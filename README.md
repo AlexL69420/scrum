@@ -1,6 +1,8 @@
-# React + TypeScript + Vite
+# SRUM client
 
 Чтобы запустить:
-npm i
-npm run dev
-кликнуть на ссылку
+
+- открыть терминал
+- npm i
+- npm run dev
+- кликнуть на ссылку (порт будет указан)
