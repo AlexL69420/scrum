@@ -1,108 +1,195 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import { LOCAL_API_URL } from "../environment";
-import { useAuth } from "../contexts/AuthContext";
-import { Button } from "flowbite-react";
+import { LOCAL_API_URL } from "../utils/environment";
+import { FiX, FiUser, FiLock, FiUserPlus, FiLogIn } from "react-icons/fi";
 
 export default function RegisterForm() {
-  // Состояние для обработки ошибок
-  const [error, setError] = useState<string | null>(null);
-
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [displayedName, setDisplayedName] = useState<string>("");
-
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError(null);
 
     try {
+      // Валидация полей
+      if (!username.trim() || !password.trim() || !displayedName.trim()) {
+        setError("Пожалуйста, заполните все поля");
+        return;
+      }
+
       const response = await axios.post(
         `${LOCAL_API_URL}/auth/sign`,
         {
-          username,
-          password,
-          displayedName,
+          login: username,
+          password: password,
+          name: displayedName,
         },
-        { withCredentials: true },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
       );
 
-      console.log("Успешный вход:", response.data);
-      login(response.data.user);
-      navigate("/");
+      console.log("Успешная регистрация:", response.data);
+      navigate("/auth");
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        // Обработка ошибок, возвращаемых сервером
-        if (err.response) {
-          const errorMessage =
-            err.response.data.error || "Ошибка при создании пользователя";
-          setError(errorMessage);
-        } else if (err.request) {
-          setError("Ошибка сети. Проверьте подключение к интернету.");
-        } else {
-          setError("Произошла ошибка при отправке запроса.");
-        }
-      } else {
-        setError("Неизвестная ошибка");
-      }
+      handleRegistrationError(err as AxiosError | Error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const handleRegistrationError = (error: AxiosError | Error) => {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        const errorMessage =
+          error.response.data?.error || "Ошибка при регистрации";
+        setError(errorMessage);
+      } else if (error.request) {
+        setError("Ошибка сети. Проверьте подключение к интернету.");
+      } else {
+        setError("Произошла ошибка при отправке запроса.");
+      }
+    } else {
+      setError("Неизвестная ошибка");
+    }
+    console.error("Ошибка регистрации:", error);
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-100 dark:bg-slate-500">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md dark:bg-slate-700 dark:text-slate-200">
-        <div className="flex w-full justify-end">
-          <Link to="/">
-            <Button
-              color="light"
-              className="flex size-10 items-center justify-center rounded-full border-2 border-black bg-white text-black hover:bg-slate-300 disabled:pointer-events-none dark:border-white dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
-            >
-              X
-            </Button>
+    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-800">
+      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg dark:bg-gray-700">
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+            <FiUserPlus className="mr-2 inline" />
+            Регистрация
+          </h1>
+          <Link
+            to="/"
+            className="rounded-full p-2 text-gray-500 hover:cursor-pointer hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-600"
+            aria-label="Закрыть"
+          >
+            <FiX className="h-5 w-5" />
           </Link>
         </div>
-        <h1 className="mb-6 text-center text-2xl font-bold">
-          Регистрация аккаунта
-        </h1>
 
-        {error && <p className="mb-4 text-xl text-red-500">{error}</p>}
-        <form
-          onSubmit={handleRegister}
-          className="flex flex-col items-center gap-4"
-        >
-          <input
-            type="text"
-            placeholder="Отображаемое имя"
-            value={displayedName}
-            onChange={(e) => setDisplayedName(e.target.value)}
-            className="w-full rounded-lg border px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-slate-600"
-          />
+        {error && (
+          <div className="mb-6 rounded-lg bg-red-100 p-4 dark:bg-red-900/50">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-red-800 dark:text-red-200">
+                Ошибка
+              </h3>
+              <div
+                onClick={() => setError(null)}
+                className="text-red-800 hover:cursor-pointer hover:text-red-900 dark:text-red-200 dark:hover:text-red-100"
+              >
+                <FiX className="h-5 w-5" />
+              </div>
+            </div>
+            <p className="mt-2 text-red-700 dark:text-red-300">{error}</p>
+          </div>
+        )}
 
-          <input
-            type="text"
-            placeholder="Имя пользователя"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full max-w-lg rounded-lg border px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-slate-600"
-          />
-          <input
-            type="password"
-            placeholder="Пароль"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full max-w-lg rounded-lg border px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-slate-600"
-          />
+        <form onSubmit={handleRegister} className="space-y-6">
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="displayName"
+                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Отображаемое имя
+              </label>
+              <div className="relative">
+                <FiUser className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <input
+                  id="displayName"
+                  type="text"
+                  placeholder="Ваше имя"
+                  value={displayedName}
+                  onChange={(e) => setDisplayedName(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 py-2 pr-4 pl-10 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-emerald-500 dark:focus:ring-emerald-500"
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="username"
+                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Имя пользователя
+              </label>
+              <div className="relative">
+                <FiUser className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <input
+                  id="username"
+                  type="text"
+                  placeholder="Придумайте логин"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 py-2 pr-4 pl-10 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-emerald-500 dark:focus:ring-emerald-500"
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Пароль
+              </label>
+              <div className="relative">
+                <FiLock className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="Придумайте пароль"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 py-2 pr-4 pl-10 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-emerald-500 dark:focus:ring-emerald-500"
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+          </div>
 
           <button
             type="submit"
-            className="w-full max-w-lg rounded-lg bg-blue-500 py-2 text-white transition duration-200 hover:bg-blue-600 dark:bg-sky-900 dark:text-slate-200 dark:hover:bg-blue-800"
+            disabled={isLoading}
+            className="flex w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-white transition-colors hover:cursor-pointer hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none disabled:opacity-70 dark:bg-emerald-700 dark:hover:bg-emerald-600 dark:focus:ring-emerald-600"
           >
-            Зарегистрироваться
+            {isLoading ? (
+              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+            ) : (
+              <>
+                <FiUserPlus className="mr-2" />
+                Зарегистрироваться
+              </>
+            )}
           </button>
         </form>
+
+        <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+          Уже есть аккаунт?{" "}
+          <Link
+            to="/auth"
+            className="font-medium text-emerald-600 hover:cursor-pointer hover:underline dark:text-emerald-400"
+          >
+            <FiLogIn className="mr-1 inline" />
+            Войти
+          </Link>
+        </div>
       </div>
     </main>
   );
