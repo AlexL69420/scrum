@@ -10,7 +10,9 @@ import api from "../utils/jwthandle";
 import { isAuthenticated } from "../utils/auth";
 
 interface UserData {
-  username: string;
+  id: number;
+  name: string;
+  email: string;
 }
 
 export function Header() {
@@ -21,7 +23,8 @@ export function Header() {
     const fetchUserData = async () => {
       if (isAuthenticated()) {
         try {
-          const response = await api.get<UserData>("/auth/user");
+          const response = await api.get<UserData>("/user/get");
+          console.log(response.data);
           setUser(response.data);
         } catch (error) {
           console.error("Ошибка при получении данных пользователя:", error);
@@ -59,7 +62,7 @@ export function Header() {
             </Link>
           ) : (
             <Link to="/profile">
-              <h1 className="hover:text-amber-100">{user.username}</h1>
+              <h1 className="hover:text-amber-100">{user.name}</h1>
             </Link>
           )}
         </div>

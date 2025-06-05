@@ -1,24 +1,99 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../utils/jwthandle";
 
-export function Sidebar() {
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+interface RoleResponse {
+  user: User;
+  granted: "SUPER_USER" | "SUB_SUPER_USER" | "USER";
+}
+
+type SidebarProps = {
+  id: string;
+};
+
+export function Sidebar({ id }: SidebarProps) {
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [userRole, setUserRole] = useState<
+    "SUPER_USER" | "SUB_SUPER_USER" | "USER" | null
+  >(null);
+  const [loading, setLoading] = useState(true);
+
+  // Загрузка роли пользователя
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        // Получаем роль пользователя
+        const roleResponse = await api.get<RoleResponse>(
+          `/user/get_role/${id}`,
+        );
+        setUserRole(roleResponse.data.granted);
+      } catch (err) {
+        console.error("Ошибка при загрузке роли пользователя:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserRole();
+  }, [id]);
 
   const menuItems = [
-    { name: "Главная", onClick: () => navigate("/project/:id") },
+    { name: "Главная", onClick: () => navigate(`/project/${id}`) },
     {
       name: "Доска заданий",
-      onClick: () => navigate("/project/:id/taskboard"),
+      onClick: () =>
+        navigate(
+          userRole === "USER"
+            ? `/project/${id}/taskboard/0`
+            : `/project/${id}/sprints`,
+        ),
     },
-    { name: "Аналитика", onClick: () => navigate("/project/:id/analytics") },
-    { name: "Участники", onClick: () => navigate("/project/:id/members") },
-    { name: "Команды", onClick: () => navigate("/project/:id/teams") },
+    ...(userRole !== "USER"
+      ? [
+          {
+            name: "Аналитика",
+            onClick: () => navigate(`/project/${id}/analytics`),
+          },
+          {
+            name: "Участники",
+            onClick: () => navigate(`/project/${id}/members`),
+          },
+        ]
+      : []),
+
+    { name: "Команды", onClick: () => navigate(`/project/${id}/teams`) },
   ];
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
   };
+
+  if (loading) {
+    return (
+      <div className="flex h-[calc(100vh-6rem)]">
+        <div className="flex min-w-64 flex-col border-r border-gray-200 bg-gray-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 rounded bg-gray-200 dark:bg-slate-700"></div>
+            <div className="space-y-2">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-10 rounded bg-gray-200 dark:bg-slate-700"
+                ></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-[calc(100vh-6rem)]">
@@ -45,7 +120,6 @@ export function Sidebar() {
             </ul>
           </nav>
 
-          {/* кнопка "Другие проекты"  */}
           <button
             onClick={() => navigate("/")}
             className="mb-4 flex w-full items-center justify-center rounded-lg border-gray-200 bg-white p-3 shadow-sm hover:cursor-pointer dark:border-slate-700 dark:bg-slate-900"

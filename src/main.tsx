@@ -13,6 +13,8 @@ import { TasksPage } from "./pages/TasksPage.tsx";
 import { AnalyticsPage } from "./pages/AnalyticsPage.tsx";
 import { MembersPage } from "./pages/MembersPage.tsx";
 import { TeamsPage } from "./pages/TeamsPage.tsx";
+import { SprintsPage } from "./pages/SprintPage.tsx";
+import { SharePage } from "./pages/SharePage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -46,7 +48,7 @@ const router = createBrowserRouter([
     errorElement: <NotFoundPage />,
   },
   {
-    path: "/project/:id/taskboard",
+    path: "/project/:id/taskboard/:sprintid",
     element: <TasksPage />,
     errorElement: <NotFoundPage />,
   },
@@ -63,6 +65,16 @@ const router = createBrowserRouter([
   {
     path: "/project/:id/teams",
     element: <TeamsPage />,
+    errorElement: <NotFoundPage />,
+  },
+  {
+    path: "/project/:id/sprints",
+    element: <SprintsPage />,
+    errorElement: <NotFoundPage />,
+  },
+  {
+    path: "/share",
+    element: <SharePage />,
     errorElement: <NotFoundPage />,
   },
 ]);

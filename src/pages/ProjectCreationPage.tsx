@@ -83,7 +83,7 @@ export default function CreateProjectPage() {
         <div className="mx-auto max-w-md pt-10">
           <div className="rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
             <h2 className="mb-6 text-2xl font-bold text-gray-800 dark:text-white">
-              Create New Project
+              Создать новый проект
             </h2>
             <div className="rounded-lg bg-red-100 p-4 text-red-700 dark:bg-red-900 dark:text-red-100">
               You must be logged in to create a project
@@ -93,13 +93,13 @@ export default function CreateProjectPage() {
                 onClick={() => navigate("/auth")}
                 className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
               >
-                Sign In
+                Войти
               </button>
               <button
                 onClick={() => navigate("/register")}
                 className="flex-1 rounded-lg bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
               >
-                Register
+                Регистрация
               </button>
             </div>
           </div>
@@ -115,16 +115,16 @@ export default function CreateProjectPage() {
       <div className="mx-auto max-w-2xl">
         <button
           onClick={() => navigate(-1)}
-          className="group mb-6 flex items-center text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+          className="group mb-6 flex items-center text-gray-600 hover:cursor-pointer hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
         >
           <FiArrowLeft className="mr-2 transition-transform group-hover:-translate-x-1" />
-          Back to projects
+          Вернуться к проектам
         </button>
 
         <div className="grid gap-6 md:grid-cols-2">
           <div className="rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
             <h2 className="mb-6 text-2xl font-bold text-gray-800 dark:text-white">
-              Create New Project
+              Создание проекта
             </h2>
 
             {error && (
@@ -188,7 +188,7 @@ export default function CreateProjectPage() {
                   ) : (
                     <>
                       <FiPlus className="mr-2" />
-                      Create Project
+                      Создать проект
                     </>
                   )}
                 </button>

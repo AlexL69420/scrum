@@ -1,61 +1,64 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { LOCAL_API_URL } from "../utils/environment";
 import { MyFooter } from "../components/Footer";
 import { Button } from "flowbite-react";
+import api from "../utils/jwthandle";
+import { isAuthenticated } from "../utils/auth";
+
+interface UserData {
+  id: number;
+  name: string;
+  email: string;
+}
 
 export default function ProfilePage() {
   const [oldPassword, setOldPassword] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
-  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<UserData | null>(null);
   const navigate = useNavigate();
-  const logout = null;
-  const user = null;
 
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      await axios.put(`${LOCAL_API_URL}api/users/change-password`, {
-        oldPassword,
-        newPassword,
-      });
-      setError("");
-      setSuccess("Пароль успешно изменён");
-      setOldPassword("");
-      setNewPassword("");
-      setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
-      setError(`Ошибка при изменении пароля: ${err}`);
-      setTimeout(() => setError(""), 5000);
+  const fetchUserData = async () => {
+    if (isAuthenticated()) {
+      try {
+        const response = await api.get<UserData>("/user/get");
+        console.log(response.data);
+        setUser(response.data);
+      } catch (error) {
+        console.error("Ошибка при получении данных пользователя:", error);
+        navigate("/auth");
+      }
+    } else {
+      navigate("/auth");
     }
+    setLoading(false);
   };
 
-  const handleLogout = async () => {
-    try {
-      await axios.post(`${LOCAL_API_URL}api/users/logout`);
-      logout();
-      navigate("/");
-    } catch (err) {
-      setError(`Ошибка при выходе из аккаунта: ${err}`);
-      setTimeout(() => setError(""), 5000);
-    }
+  const handleChangePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Заглушка - просто показываем сообщение
+    setSuccess("Функция изменения пароля временно недоступна");
+    setOldPassword("");
+    setNewPassword("");
+    setTimeout(() => setSuccess(""), 3000);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("jwtToken");
+    navigate("/");
   };
 
   useEffect(() => {
-    if (!user) {
-      navigate("/auth");
-    }
-  }, [user, navigate]);
+    fetchUserData();
+  }, []);
 
-  if (error) {
+  if (loading) {
     return (
       <main className="flex min-h-screen flex-col items-center bg-emerald-50 dark:bg-slate-800">
-        <div className="flex w-full max-w-4xl flex-1 flex-col items-center p-4">
-          <div className="mt-8 w-full rounded-xl bg-red-100 p-4 text-center text-red-700 shadow-md dark:bg-red-900/80 dark:text-red-100">
-            {error}
+        <div className="flex w-full max-w-4xl flex-1 flex-col items-center justify-center p-4">
+          <div className="text-xl font-medium text-emerald-600 dark:text-emerald-400">
+            Загрузка данных...
           </div>
         </div>
         <MyFooter />
@@ -83,14 +86,17 @@ export default function ProfilePage() {
           <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 p-8 text-center dark:from-slate-700 dark:to-slate-800">
             <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
               <span className="text-4xl font-bold text-white">
-                {user?.username?.charAt(0).toUpperCase() || "?"}
+                {user?.name?.charAt(0).toUpperCase() || "?"}
               </span>
             </div>
             <h1 className="mt-4 text-3xl font-bold text-white">
               Профиль пользователя
             </h1>
             <div className="mt-2 text-xl font-medium text-emerald-100 dark:text-slate-300">
-              {user?.username}
+              {user?.name || "Пользователь"}
+            </div>
+            <div className="mt-1 text-sm text-emerald-200 dark:text-slate-400">
+              {user?.email}
             </div>
           </div>
 
@@ -126,7 +132,7 @@ export default function ProfilePage() {
                     value={oldPassword}
                     onChange={(e) => setOldPassword(e.target.value)}
                     className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:focus:ring-emerald-600/50"
-                    required
+                    disabled
                   />
                 </div>
 
@@ -144,7 +150,7 @@ export default function ProfilePage() {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:focus:ring-emerald-600/50"
-                    required
+                    disabled
                     minLength={6}
                   />
                 </div>
@@ -152,6 +158,7 @@ export default function ProfilePage() {
                 <button
                   type="submit"
                   className="w-full rounded-lg bg-emerald-600 py-3 font-medium text-white transition duration-200 hover:cursor-pointer hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none dark:bg-slate-700 dark:hover:bg-slate-600 dark:focus:ring-slate-600"
+                  disabled
                 >
                   Изменить пароль
                 </button>

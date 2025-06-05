@@ -9,7 +9,7 @@ export function AnalyticsPage() {
     <main className="flex min-h-screen flex-col items-center gap-2 bg-gradient-to-r from-slate-200 to-slate-200 text-black dark:from-slate-500 dark:to-slate-800 dark:text-white">
       <Header />
       <div className="flex min-h-screen min-w-screen flex-row gap-4 px-2 py-6">
-        <Sidebar />
+        {id !== undefined ? <Sidebar id={id} /> : null}
         <div className="flex w-full justify-center">
           <div className="flex h-[calc(100vh-64px)] w-2/3 flex-col items-center overflow-y-auto bg-gray-50 p-4 dark:bg-gray-800">
             <h1 className="mb-6 text-3xl font-bold">Аналитика проекта</h1>

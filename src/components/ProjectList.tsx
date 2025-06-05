@@ -59,7 +59,7 @@ export default function ProjectList() {
       <div className="mx-auto max-w-4xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-            {isAuthenticated() ? "My Projects" : "Projects"}
+            {isAuthenticated() ? "Мои проекты" : "Проекты"}
           </h1>
           {isAuthenticated() && (
             <button
@@ -67,7 +67,7 @@ export default function ProjectList() {
               className="flex items-center rounded bg-emerald-600 px-4 py-2 text-white transition-colors hover:cursor-pointer hover:bg-emerald-700 dark:bg-slate-700 dark:hover:bg-slate-600"
             >
               <FiPlus className="mr-2" />
-              Create New Project
+              Создать проект
             </button>
           )}
         </div>
@@ -82,13 +82,13 @@ export default function ProjectList() {
                 onClick={() => navigate("/auth")}
                 className="rounded bg-emerald-600 px-4 py-2 text-white transition-colors hover:cursor-pointer hover:bg-emerald-700 dark:bg-slate-700 dark:hover:bg-slate-600"
               >
-                Sign In
+                Войти
               </button>
               <button
                 onClick={() => navigate("/register")}
                 className="rounded bg-gray-200 px-4 py-2 text-gray-800 transition-colors hover:cursor-pointer hover:bg-gray-300 dark:bg-slate-800 dark:text-gray-100 dark:hover:bg-slate-700"
               >
-                Register
+                Регистрация
               </button>
             </div>
           </div>
